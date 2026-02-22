@@ -38,9 +38,8 @@ def example2():
     """
     Решение задачи через протоколы входа/выхода
     """
-
-    from JuThesis.protocols.models import ProtocolInput, TestInfo
     from JuThesis.adapters import solve_with_protocol
+    from JuThesis.protocols.models import ProtocolInput, TestInfo
 
     # Создаем входные данные
     protocol_input = ProtocolInput(
@@ -85,6 +84,26 @@ def example2():
         print(f"  - {test_info.test}: {test_info.functions}")
 
 
+def example3():
+    """
+    Чтение данных из файла json и запись в output.json (вместе с выводом в консоль)
+    """
+    from JuThesis.adapters import solve_with_protocol
+    from JuThesis.io.readers.json_reader import JsonReader
+    from JuThesis.io.writers.json_writer import JsonWriter
+
+    inp = JsonReader.read("input.json")
+    result = solve_with_protocol(inp)
+    JsonWriter.write(result, "output.json")
+
+    # Также выводим результат в консоль
+    print(f"Selected tests:     {len(result.tests)}")
+    print(f"Covered functions:  {result.total_functions_covered}")
+    print(f"Total time:         {result.total_execution_time}")
+    for test_info in result.tests:
+        print(f"  - {test_info.test}: {test_info.functions}")
+
+
 if __name__ == "__main__":
     print("Example 1")
     example1()
@@ -93,3 +112,8 @@ if __name__ == "__main__":
 
     print("Example 2")
     example2()
+
+    print()
+
+    print("Example 3")
+    example3()

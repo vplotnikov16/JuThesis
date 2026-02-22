@@ -1,0 +1,48 @@
+{
+  "version": "1.0.0",
+  "modified_functions": [
+    "func1",
+    "func2",
+    "func3",
+    "func4",
+    "func5",
+    "func6"
+  ],
+  "available_tests": {
+    "test1": {
+      "time": 3,
+      "covered_functions": [
+        "func1",
+        "func2",
+        "funcA"
+      ]
+    },
+    "test2": {
+      "time": 4,
+      "covered_functions": [
+        "func2",
+        "func3",
+        "func4",
+        "funcB"
+      ]
+    },
+    "test3": {
+      "time": 2,
+      "covered_functions": [
+        "func4",
+        "func5",
+        "funcC"
+      ]
+    },
+    "test4": {
+      "time": 3,
+      "covered_functions": [
+        "func3",
+        "func6",
+        "funcD"
+      ]
+    }
+  },
+  "time_budget": 7,
+  "max_initial_coverage_size": 2
+}
