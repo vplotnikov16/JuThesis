@@ -1,29 +1,22 @@
-[project]
-name = "juthesis"
-version = "0.1.0"
-description = ""
-authors = [
-    { name = "vplotnikov16", email = "vplotnikov16@yandex.ru" }
-]
-readme = "README.md"
-requires-python = ">=3.10,<4.0"
-
-dependencies = [
-    "poetry-core (>=2.0.0)",
-    "pydantic (>=2.12.5,<3.0.0)",
-]
-
-[project.optional-dependencies]
-dev = [
-    "pytest (>=9.0.2,<10.0.0)"
-]
-
 [tool.poetry]
-package-mode = true
+name = "juthesis"
+version = "1.0.0"
+description = "Test suite optimization library with time budget constraints"
+authors = ["unknown_name <unknown_email>"]
+readme = "README.md"
+packages = [{ include = "JuThesis" }]
 
-[project.scripts]
+[tool.poetry.dependencies]
+python = ">=3.10,<4.0"
+pydantic = "^2.12.5"
+poetry-core = ">=2.0.0"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^9.0.2"
+
+[tool.poetry.scripts]
 juthesis = "JuThesis.cli:main"
 
 [build-system]
-requires = ["poetry-core>=2.0.0,<3.0.0"]
+requires = ["poetry-core>=2.0.0"]
 build-backend = "poetry.core.masonry.api"
