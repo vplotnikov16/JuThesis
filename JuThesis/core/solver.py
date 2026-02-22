@@ -31,7 +31,8 @@ def _solve_impl(inp: SolverInput, h: TestSet) -> SolverOutput:
     w = sum(inp.t_i[i] for i in h)
 
     # Начальный вектор выбора тестов
-    x = [1 if (i in h) else 0 for i in sorted(inp.I)]
+    # Индексация: x[i-1] соответствует тесту i из I
+    x = [1 if i in h else 0 for i in range(1, inp.m + 1)]
 
     # Множество уже покрытых функций
     covered = set()
@@ -44,12 +45,9 @@ def _solve_impl(inp: SolverInput, h: TestSet) -> SolverOutput:
     while remain > 0:
         # Вычисляем дельты и плотности для всех невыбранных тестов
         candidates = {}
-        for i in sorted(inp.I):
-            # Индекс в векторе x (тесты нумеруются с 1, индексы с 0)
-            idx = list(sorted(inp.I)).index(i)
-
+        for i in inp.I:
             # Рассматриваем еще не выбранный тест
-            if x[idx] == 0:
+            if x[i - 1] == 0:
                 # Сколько новых функций добавит тест i
                 new_funcs = inp.J_i[i] - covered
                 delta = len(new_funcs)
@@ -66,21 +64,21 @@ def _solve_impl(inp: SolverInput, h: TestSet) -> SolverOutput:
 
         # Выбираем тест с максимальной плотностью
         best_i = max(candidates, key=candidates.get)
-        best_idx = list(sorted(inp.I)).index(best_i)
 
         # Окончательная проверка
         if inp.t_i[best_i] > remain:
             break
 
         # Обновляем состояние
-        x[best_idx] = 1
+        x[best_i - 1] = 1
         w += inp.t_i[best_i]
         remain = inp.T - w
         covered |= inp.J_i[best_i]
 
-    # Формируем выходной вектор y
-    y = tuple(1 if j in covered else 0 for j in sorted(inp.J))
-    return SolverOutput(x=tuple(x), y=y)
+    x = tuple(x)
+    # y[j-1] соответствует функции j из J
+    y = tuple(1 if j in covered else 0 for j in range(1, inp.n + 1))
+    return SolverOutput(x=x, y=y)
 
 
 def solve(inp: SolverInput) -> SolverOutput:
