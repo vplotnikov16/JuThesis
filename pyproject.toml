@@ -11,11 +11,18 @@ requires-python = ">=3.10,<4.0"
 dependencies = [
     "poetry-core (>=2.0.0)",
     "pydantic (>=2.12.5,<3.0.0)",
+]
+
+[project.optional-dependencies]
+dev = [
     "pytest (>=9.0.2,<10.0.0)"
 ]
 
 [tool.poetry]
-package-mode = false
+package-mode = true
+
+[project.scripts]
+juthesis = "JuThesis.cli:main"
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
