@@ -7,6 +7,7 @@ from JuThesis.core.models import SolverInput, SolverOutput, TestSet
 def get_start_coverage_generator(tests: TestSet, k: int = 2) -> Generator[TestSet, None, None]:
     """
     Генератор начальных покрытий H.
+
     :param tests: множество всех тестов, из которых должны строиться начальные покрытия
     :param k: максимальная мощность начальных покрытий
     :return: генератор всевозможных комбинаций начальных покрытий множества tests
@@ -19,14 +20,18 @@ def get_start_coverage_generator(tests: TestSet, k: int = 2) -> Generator[TestSe
 
 
 def _solve_impl(inp: SolverInput, h: TestSet) -> SolverOutput:
+    """
+    Жадное дополнение начального покрытия h до финального решения.
+
+    :param inp: входные данные задачи
+    :param h: начальное покрытие (подмножество тестов)
+    :return: решение с выбранными тестами и покрытыми функциями
+    """
     # Текущие затраты по времени
     w = sum(inp.t_i[i] for i in h)
 
-    # TODO Начальный вектор x должен быть tuple сразу
-    x = [0] * inp.m
-    for i in h:
-        x[i - 1] = 1
-    x = tuple(x)
+    # Начальный вектор выбора тестов
+    x = [1 if (i in h) else 0 for i in sorted(inp.I)]
 
     # Множество уже покрытых функций
     covered = set()
@@ -36,71 +41,81 @@ def _solve_impl(inp: SolverInput, h: TestSet) -> SolverOutput:
     remain = inp.T - w
 
     # Жадное дополнение
-    while True:
-        # Если времени не осталось, то заканчиваем жадное дополнение
-        if remain <= 0:
-            break
-
-        # Вычисляем дельты для всех невыбранных тестов
-        deltas = {}
-        for i in sorted(inp.I):
-            if x[i - 1] == 0:
-                # сколько новых функций добавит тест i относительно текущего покрытия
-                new_funcs = inp.J_i[i].difference(covered)
-                delta = len(new_funcs)
-                # флаг "помещается ли тест в оставшееся время"
-                time_ok = inp.t_i[i] <= remain
-                deltas[i] = (delta, time_ok)
-            else:
-                # i - уже выбранный тест
-                pass
-
+    while remain > 0:
+        # Вычисляем дельты и плотности для всех невыбранных тестов
         candidates = {}
-        for i, (delta, time_ok) in deltas.items():
-            if delta > 0 and time_ok:
-                rho = delta / inp.t_i[i]
-                candidates[i] = (delta, rho)
+        for i in sorted(inp.I):
+            # Индекс в векторе x (тесты нумеруются с 1, индексы с 0)
+            idx = list(sorted(inp.I)).index(i)
+
+            # Рассматриваем еще не выбранный тест
+            if x[idx] == 0:
+                # Сколько новых функций добавит тест i
+                new_funcs = inp.J_i[i] - covered
+                delta = len(new_funcs)
+
+                # Проверяем, что тест добавляет функции и помещается по времени
+                if delta > 0 and inp.t_i[i] <= remain:
+                    # Плотность покрытия
+                    rho = delta / inp.t_i[i]
+                    candidates[i] = rho
 
         if not candidates:
             # Кандидатов нет, прекращаем жадное дополнение
             break
 
-        best_i: int | None = None
-        best_rho: float | None = None
-        for i in sorted(candidates):
-            delta, rho = candidates[i]
-            if best_rho is None or rho > best_rho:
-                best_rho = rho
-                best_i = i
+        # Выбираем тест с максимальной плотностью
+        best_i = max(candidates, key=candidates.get)
+        best_idx = list(sorted(inp.I)).index(best_i)
 
         # Окончательная проверка
         if inp.t_i[best_i] > remain:
             break
 
-        # Выставляет тест best_i как выбранный
-        x = tuple(x[i] if i != (best_i - 1) else 1 for i in range(len(x)))
-        # Обновляем затраты по времени
-        w = w + inp.t_i[best_i]
+        # Обновляем состояние
+        x[best_idx] = 1
+        w += inp.t_i[best_i]
         remain = inp.T - w
         covered |= inp.J_i[best_i]
 
+    # Формируем выходной вектор y
     y = tuple(1 if j in covered else 0 for j in sorted(inp.J))
-    return SolverOutput(x=x, y=y)
+    return SolverOutput(x=tuple(x), y=y)
 
 
 def solve(inp: SolverInput) -> SolverOutput:
+    """
+    Решает задачу оптимизации тестового покрытия.
+
+    Перебирает все начальные покрытия H мощности <= K,
+    для каждого выполняет жадное дополнение и выбирает лучшее решение.
+
+    :param inp: входные данные задачи
+    :return: лучшее найденное решение
+    """
+    # Перебор начальных покрытиый
     start_cov_generator = get_start_coverage_generator(inp.I, inp.K)
     best: SolverOutput | None = None
+
     for h_index, h in enumerate(start_cov_generator):
         # Затраты по времени начального покрытия
         w = sum(inp.t_i[i] for i in h)
+
         # Если начальное покрытие уже не подходит по бюджету времени, то
         # переходим к рассмотрению следующего начального покрытия
         if w > inp.T:
             continue
 
         result = _solve_impl(inp, h)
-        if best is None or best.f > result.f:
+
+        # Выбираем решение с наибольшим значением целевой функции
+        if best is None or result.f > best.f:
             best = result
+
+    # Если не нашлось никакого решения, то возвращаем пустое
+    if best is None:
+        x = tuple(0 for _ in range(inp.m))
+        y = tuple(0 for _ in range(inp.n))
+        best = SolverOutput(x=x, y=y)
 
     return best

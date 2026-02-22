@@ -20,9 +20,9 @@ class SolverInput:
     # Покрытия тестов
     J_i: Dict[Test, FunctionsSet]
     # Время выполнения тестов
-    t_i: Dict[Test, int]
+    t_i: Dict[Test, float]
     # Бюджет времени тестирования
-    T: int
+    T: float
     # Максимальная мощность стартового набора тестов H
     K: int = 2
 
@@ -49,9 +49,9 @@ class SolverOutput:
     Результат работы решателя
     """
     # Вектор "какие тесты выбраны"
-    x: Tuple[Test]
+    x: Tuple[Test] | Tuple[Test, ...]
     # Вектор "какие функции покрыты"
-    y: Tuple[Function_or_Method]
+    y: Tuple[Function_or_Method] | Tuple[Function_or_Method, ...]
 
     @property
     def f(self):
