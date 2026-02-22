@@ -1,0 +1,56 @@
+{
+  "$defs": {
+    "SelectedTestInfo": {
+      "description": "Информация о выбранном тесте ",
+      "properties": {
+        "test": {
+          "title": "Test",
+          "type": "string"
+        },
+        "functions": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Functions",
+          "type": "array"
+        }
+      },
+      "required": [
+        "test",
+        "functions"
+      ],
+      "title": "SelectedTestInfo",
+      "type": "object"
+    }
+  },
+  "description": "Выходной протокол ",
+  "properties": {
+    "version": {
+      "default": "1.0.0",
+      "title": "Version",
+      "type": "string"
+    },
+    "tests": {
+      "items": {
+        "$ref": "#/$defs/SelectedTestInfo"
+      },
+      "title": "Tests",
+      "type": "array"
+    },
+    "total_execution_time": {
+      "title": "Total Execution Time",
+      "type": "number"
+    },
+    "total_functions_covered": {
+      "title": "Total Functions Covered",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "tests",
+    "total_execution_time",
+    "total_functions_covered"
+  ],
+  "title": "ProtocolOutput",
+  "type": "object"
+}

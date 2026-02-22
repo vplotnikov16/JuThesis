@@ -1,0 +1,64 @@
+{
+  "$defs": {
+    "TestInfo": {
+      "description": "Информация о тесте ",
+      "properties": {
+        "time": {
+          "title": "Time",
+          "type": "number"
+        },
+        "covered_functions": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Covered Functions",
+          "type": "array"
+        }
+      },
+      "required": [
+        "time",
+        "covered_functions"
+      ],
+      "title": "TestInfo",
+      "type": "object"
+    }
+  },
+  "description": "Входной протокол ",
+  "properties": {
+    "version": {
+      "default": "1.0.0",
+      "title": "Version",
+      "type": "string"
+    },
+    "modified_functions": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Modified Functions",
+      "type": "array"
+    },
+    "available_tests": {
+      "additionalProperties": {
+        "$ref": "#/$defs/TestInfo"
+      },
+      "title": "Available Tests",
+      "type": "object"
+    },
+    "time_budget": {
+      "title": "Time Budget",
+      "type": "number"
+    },
+    "max_initial_coverage_size": {
+      "title": "Max Initial Coverage Size",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "modified_functions",
+    "available_tests",
+    "time_budget",
+    "max_initial_coverage_size"
+  ],
+  "title": "ProtocolInput",
+  "type": "object"
+}
